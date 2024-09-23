@@ -14,8 +14,8 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    这是一个为 UD 提供支持的IntelliJ IDEA插件。<br>
-    <em>可以帮助开发者更高效地使用 UD 相关功能。</em>
+    This is an IntelliJ IDEA plugin that provides support for UD.<br>
+    <em>It can help developers use UD-related features more efficiently.</em>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
