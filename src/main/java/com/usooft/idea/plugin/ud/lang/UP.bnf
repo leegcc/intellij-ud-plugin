@@ -1,0 +1,23 @@
+{
+  parserClass="com.usooft.idea.plugin.ud.lang.parser.UPParser"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="UP"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.usooft.idea.plugin.ud.lang.psi"
+  psiImplPackage="com.usooft.idea.plugin.ud.lang.psi.impl"
+
+  elementTypeHolderClass="com.usooft.idea.plugin.ud.lang.psi.UPTypes"
+  elementTypeClass="com.usooft.idea.plugin.ud.lang.psi.UPElementType"
+  tokenTypeClass="com.usooft.idea.plugin.ud.lang.psi.UPTokenType"
+}
+
+root ::= statement*
+
+private statement ::= packageDeclaration | moduleDeclaration | comment
+
+packageDeclaration ::= PACKAGE_KEYWORD PACKAGE_NAME {pin=1}
+moduleDeclaration ::= MODULE_KEYWORD IDENTIFIER DESC {pin=1}
+
+comment ::= BLOCK_COMMENT
+

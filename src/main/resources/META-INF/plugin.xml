@@ -1,0 +1,68 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.usooft.intellij-ud-plugin</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>UD Support</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="ud@ligang.me" url="https://ud.ligang.me">UD</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    这是一个为 UD 提供支持的IntelliJ IDEA插件。<br>
+    <em>可以帮助开发者更高效地使用 UD 相关功能。</em>
+  ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+                name="UD Module File"
+                implementationClass="com.usooft.idea.plugin.ud.lang.UMFileType"
+                fieldName="INSTANCE"
+                language="UM"
+                extensions="um"/>
+
+        <fileType
+                name="UD Project File"
+                implementationClass="com.usooft.idea.plugin.ud.lang.UPFileType"
+                fieldName="INSTANCE"
+                language="UP"
+                extensions="up"/>
+
+        <lang.parserDefinition
+                language="UP"
+                implementationClass="com.usooft.idea.plugin.ud.lang.UPParserDefinitionImpl"/>
+
+        <lang.parserDefinition
+                language="UM"
+                implementationClass="com.usooft.idea.plugin.ud.lang.UMParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory
+                language="UP"
+                implementationClass="com.usooft.idea.plugin.ud.lang.highlight.UPSyntaxHighlighterFactory"/>
+
+        <completion.contributor language="UP"
+                                implementationClass="com.usooft.idea.plugin.ud.lang.completion.UPCompletionContributor"/>
+
+        <typedHandler implementation="com.usooft.idea.plugin.ud.lang.typed.UPTypedHandler"/>
+
+        <lang.syntaxHighlighterFactory
+                language="UM"
+                implementationClass="com.usooft.idea.plugin.ud.lang.highlight.UMSyntaxHighlighterFactory"/>
+
+        <annotator language="UM"
+                   implementationClass="com.usooft.idea.plugin.ud.lang.highlight.UMAnnotator"/>
+
+        <lang.foldingBuilder language="UM" implementationClass="com.usooft.idea.plugin.ud.lang.folding.UMFoldingBuilder"/>
+    </extensions>
+</idea-plugin>

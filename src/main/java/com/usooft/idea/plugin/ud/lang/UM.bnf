@@ -1,0 +1,107 @@
+{
+  parserClass="com.usooft.idea.plugin.ud.lang.parser.UMParser"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="UM"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.usooft.idea.plugin.ud.lang.psi"
+  psiImplPackage="com.usooft.idea.plugin.ud.lang.psi.impl"
+
+  elementTypeHolderClass="com.usooft.idea.plugin.ud.lang.psi.UMTypes"
+  elementTypeClass="com.usooft.idea.plugin.ud.lang.psi.UMElementType"
+  tokenTypeClass="com.usooft.idea.plugin.ud.lang.psi.UMTokenType"
+}
+
+root ::= (item | comment)*
+
+private item ::= entityDeclaration
+
+entityDeclaration ::= ENTITY_KEYWORD IDENTIFIER DESC LBRACE (entityBody | comment)* RBRACE
+{
+    pin=2
+    mixin="com.usooft.idea.plugin.ud.lang.psi.impl.UMNamedElementImpl"
+    implements="com.usooft.idea.plugin.ud.lang.psi.UMNamedElement"
+}
+
+entityBody ::= enumDeclaration | fieldDeclaration | relationsBlock | methodsBlock
+
+enumDeclaration ::= ENUM_KEYWORD IDENTIFIER DESC LBRACE (enumValue | comment)* RBRACE
+{
+  pin=2
+  mixin="com.usooft.idea.plugin.ud.lang.psi.impl.UMNamedElementImpl"
+  implements="com.usooft.idea.plugin.ud.lang.psi.UMNamedElement"
+}
+
+enumValue ::= IDENTIFIER DESC
+
+fieldDeclaration ::= !(METHODS_KEYWORD | RELATIONS_KEYWORD) IDENTIFIER fieldType DESC attribute* {pin=2}
+
+fieldType ::= BUILTIN_TYPE | IDENTIFIER
+
+attribute ::= AT attributeName attributeParams?
+
+attributeName ::= IDENTIFIER (DOT IDENTIFIER)*
+
+private recovery_rule ::= (COMMA | RPAREN)
+
+attributeParams ::= LPAREN attributeValue (COMMA attributeValue)* RPAREN {pin=1 recoverWhile=recovery_rule}
+
+attributeValue ::= functionCall | computedExpr | NUMBER | STRING | BOOLEAN | REGEX
+
+functionCall ::= IDENTIFIER LPAREN functionParams? RPAREN
+
+functionParams ::= functionParam (COMMA functionParam)*
+
+functionParam ::= attributeValue
+
+computedExpr ::= attributeValueReference ((PLUS | MINUS | MULT | DIV) attributeValueReference)?
+
+attributeValueReference ::= IDENTIFIER (DOT IDENTIFIER)?
+
+relationsBlock ::= RELATIONS_KEYWORD LBRACE (relationDeclaration | comment)* RBRACE
+
+relationDeclaration ::= relationName relationTarget attribute* relationBody? {
+    pin = 1
+    recoverWhile = relation_recover
+}
+
+private relation_recover ::= !(RBRACE | relationName)
+
+relationBody ::= LBRACE relationField* RBRACE {
+    pin = 1
+    recoverWhile = relation_body_recover
+}
+
+private relation_body_recover ::= !(RBRACE | relationName)
+
+relationField ::= IDENTIFIER attribute* {
+    pin = 1
+    recoverWhile = relation_field_recover
+}
+
+private relation_field_recover ::= !(RBRACE | IDENTIFIER)
+
+relationName ::= IDENTIFIER
+
+relationTarget ::= IDENTIFIER (DOT IDENTIFIER)?
+
+methodsBlock ::= METHODS_KEYWORD LBRACE (methodDeclaration | comment)* RBRACE { pin = 1}
+
+methodDeclaration ::= methodName LPAREN methodParams? RPAREN DESC? attribute* {
+    pin = 1
+    recoverWhile = method_recover
+}
+
+private method_recover ::= !(RBRACE | methodName)
+
+methodName ::= IDENTIFIER
+
+methodParams ::= methodParam (COMMA methodParam)*
+
+methodParam ::= IDENTIFIER (PLUS | MINUS | QUESTION)? (EQUALS methodParamValue)?
+
+methodParamValue ::= statusTransaction | NUMBER | STRING | BOOLEAN | REGEX | IDENTIFIER
+
+statusTransaction ::= (BOOLEAN PIPE BOOLEAN) | (IDENTIFIER PIPE IDENTIFIER)
+
+comment ::= BLOCK_COMMENT | LINE_COMMENT
