@@ -17,26 +17,6 @@ public class UMAnnotator implements Annotator {
         IElementType elementType = node.getElementType();
         PsiElement parentElement = element.getParent();
 
-        if (parentElement instanceof UMAttribute) {
-            if (elementType == UMTypes.AT) {
-                holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element.getTextRange())
-                        .textAttributes(UMSyntaxHighlighter.FIELD_ATTRIBUTE_IDENTIFIER)
-                        .create();
-                return;
-            }
-        }
-
-        if (parentElement instanceof UMAttributeName) {
-            if (elementType == UMTypes.IDENTIFIER) {
-                holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element.getTextRange())
-                        .textAttributes(UMSyntaxHighlighter.FIELD_ATTRIBUTE_IDENTIFIER)
-                        .create();
-                return;
-            }
-        }
-
         // 对方法中的符号进行高亮
         if ((elementType == UMTypes.QUESTION
              || elementType == UMTypes.PLUS

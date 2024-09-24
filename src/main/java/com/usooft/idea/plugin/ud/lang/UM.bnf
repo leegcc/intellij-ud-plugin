@@ -36,13 +36,16 @@ enumDeclaration ::= ENUM_KEYWORD IDENTIFIER DESC LBRACE (enumValue | comment)* R
 
 enumValue ::= IDENTIFIER DESC
 
-fieldDeclaration ::= !(METHODS_KEYWORD | RELATIONS_KEYWORD) IDENTIFIER fieldType DESC attribute* {pin=2}
+fieldDeclaration ::= !(METHODS_KEYWORD | RELATIONS_KEYWORD) IDENTIFIER fieldType DESC attribute* {
+    pin = 2
+    recoverWhile = field_recover
+}
+
+private field_recover ::= !(IDENTIFIER | METHODS_KEYWORD | RELATIONS_KEYWORD | RBRACE)
 
 fieldType ::= BUILTIN_TYPE | IDENTIFIER
 
-attribute ::= AT &<<isNotWhiteSpace>> attributeName attributeParams?
-
-attributeName ::= IDENTIFIER (DOT IDENTIFIER)*
+attribute ::= ATTRIBUTE_PATTERN attributeParams?
 
 private recovery_rule ::= (COMMA | RPAREN)
 

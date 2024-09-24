@@ -28,12 +28,6 @@ public class UMAttributeImpl extends ASTWrapperPsiElement implements UMAttribute
   }
 
   @Override
-  @NotNull
-  public UMAttributeName getAttributeName() {
-    return findNotNullChildByClass(UMAttributeName.class);
-  }
-
-  @Override
   @Nullable
   public UMAttributeParams getAttributeParams() {
     return findChildByClass(UMAttributeParams.class);

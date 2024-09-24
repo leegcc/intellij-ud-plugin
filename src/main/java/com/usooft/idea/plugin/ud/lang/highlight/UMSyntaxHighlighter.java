@@ -56,6 +56,8 @@ public class UMSyntaxHighlighter extends SyntaxHighlighterBase {
             return new TextAttributesKey[]{BOOLEAN};
         } else if (tokenType.equals(UMTypes.PIPE)) {
             return new TextAttributesKey[]{METHOD_SYMBOL};
+        } else if (tokenType.equals(UMTypes.ATTRIBUTE_PATTERN)) {
+            return new TextAttributesKey[]{FIELD_ATTRIBUTE_IDENTIFIER};
         }
         return TextAttributesKey.EMPTY_ARRAY;
     }

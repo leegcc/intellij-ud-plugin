@@ -36,69 +36,23 @@ public class UMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // AT &<<isNotWhiteSpace>> attributeName attributeParams?
+  // ATTRIBUTE_PATTERN attributeParams?
   public static boolean attribute(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "attribute")) return false;
-    if (!nextTokenIs(b, AT)) return false;
+    if (!nextTokenIs(b, ATTRIBUTE_PATTERN)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, AT);
+    r = consumeToken(b, ATTRIBUTE_PATTERN);
     r = r && attribute_1(b, l + 1);
-    r = r && attributeName(b, l + 1);
-    r = r && attribute_3(b, l + 1);
     exit_section_(b, m, ATTRIBUTE, r);
     return r;
   }
 
-  // &<<isNotWhiteSpace>>
+  // attributeParams?
   private static boolean attribute_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "attribute_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _AND_);
-    r = isNotWhiteSpace(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // attributeParams?
-  private static boolean attribute_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "attribute_3")) return false;
     attributeParams(b, l + 1);
     return true;
-  }
-
-  /* ********************************************************** */
-  // IDENTIFIER (DOT IDENTIFIER)*
-  public static boolean attributeName(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "attributeName")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
-    r = r && attributeName_1(b, l + 1);
-    exit_section_(b, m, ATTRIBUTE_NAME, r);
-    return r;
-  }
-
-  // (DOT IDENTIFIER)*
-  private static boolean attributeName_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "attributeName_1")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!attributeName_1_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "attributeName_1", c)) break;
-    }
-    return true;
-  }
-
-  // DOT IDENTIFIER
-  private static boolean attributeName_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "attributeName_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, DOT, IDENTIFIER);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -339,16 +293,15 @@ public class UMParser implements PsiParser, LightPsiParser {
   // !(METHODS_KEYWORD | RELATIONS_KEYWORD) IDENTIFIER fieldType DESC attribute*
   public static boolean fieldDeclaration(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "fieldDeclaration")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
     boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, FIELD_DECLARATION, null);
+    Marker m = enter_section_(b, l, _NONE_, FIELD_DECLARATION, "<field declaration>");
     r = fieldDeclaration_0(b, l + 1);
     r = r && consumeToken(b, IDENTIFIER);
     p = r; // pin = 2
     r = r && report_error_(b, fieldType(b, l + 1));
     r = p && report_error_(b, consumeToken(b, DESC)) && r;
     r = p && fieldDeclaration_4(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
+    exit_section_(b, l, m, r, p, UMParser::field_recover);
     return r || p;
   }
 
@@ -392,6 +345,28 @@ public class UMParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, BUILTIN_TYPE);
     if (!r) r = consumeToken(b, IDENTIFIER);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(IDENTIFIER | METHODS_KEYWORD | RELATIONS_KEYWORD | RBRACE)
+  static boolean field_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "field_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !field_recover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // IDENTIFIER | METHODS_KEYWORD | RELATIONS_KEYWORD | RBRACE
+  private static boolean field_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "field_recover_0")) return false;
+    boolean r;
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = consumeToken(b, METHODS_KEYWORD);
+    if (!r) r = consumeToken(b, RELATIONS_KEYWORD);
+    if (!r) r = consumeToken(b, RBRACE);
     return r;
   }
 

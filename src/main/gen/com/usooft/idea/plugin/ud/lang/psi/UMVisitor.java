@@ -11,10 +11,6 @@ public class UMVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitAttributeName(@NotNull UMAttributeName o) {
-    visitPsiElement(o);
-  }
-
   public void visitAttributeParams(@NotNull UMAttributeParams o) {
     visitPsiElement(o);
   }

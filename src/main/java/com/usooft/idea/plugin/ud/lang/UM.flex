@@ -24,7 +24,7 @@ DESC="<"([^\n>])*">"
 LINE_COMMENT="//".*
 BLOCK_COMMENT="/"\*([^*]|\*+[^*/])*\*+"/"
 REGEX="/"([^\n/])*"/"
-
+ATTRIBUTE_PATTERN="@"[a-zA-Z.]+
 %%
 
 <YYINITIAL> {
@@ -39,7 +39,6 @@ REGEX="/"([^\n/])*"/"
   "|"                   { return UMTypes.PIPE; }
   ","                   { return UMTypes.COMMA; }
   "="                   { return UMTypes.EQUALS; }
-  "@"                   { return UMTypes.AT; }
   "."                   { return UMTypes.DOT; }
   "+"                   { return UMTypes.PLUS; }
   "-"                   { return UMTypes.MINUS; }
@@ -49,6 +48,7 @@ REGEX="/"([^\n/])*"/"
 
   "Int" | "String" | "Boolean" | "DateTime" | "Decimal" { return UMTypes.BUILTIN_TYPE; }
 
+  {ATTRIBUTE_PATTERN}   { return UMTypes.ATTRIBUTE_PATTERN; }
   {REGEX}               { return UMTypes.REGEX; }
   {BOOLEAN}             { return UMTypes.BOOLEAN; }
   {NUMBER}              { return UMTypes.NUMBER; }

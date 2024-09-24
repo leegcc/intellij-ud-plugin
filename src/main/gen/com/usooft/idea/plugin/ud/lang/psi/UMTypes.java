@@ -9,7 +9,6 @@ import com.usooft.idea.plugin.ud.lang.psi.impl.*;
 public interface UMTypes {
 
   IElementType ATTRIBUTE = new UMElementType("ATTRIBUTE");
-  IElementType ATTRIBUTE_NAME = new UMElementType("ATTRIBUTE_NAME");
   IElementType ATTRIBUTE_PARAMS = new UMElementType("ATTRIBUTE_PARAMS");
   IElementType ATTRIBUTE_VALUE = new UMElementType("ATTRIBUTE_VALUE");
   IElementType ATTRIBUTE_VALUE_REFERENCE = new UMElementType("ATTRIBUTE_VALUE_REFERENCE");
@@ -38,7 +37,7 @@ public interface UMTypes {
   IElementType RELATION_TARGET = new UMElementType("RELATION_TARGET");
   IElementType STATUS_TRANSACTION = new UMElementType("STATUS_TRANSACTION");
 
-  IElementType AT = new UMTokenType("AT");
+  IElementType ATTRIBUTE_PATTERN = new UMTokenType("ATTRIBUTE_PATTERN");
   IElementType BLOCK_COMMENT = new UMTokenType("BLOCK_COMMENT");
   IElementType BOOLEAN = new UMTokenType("BOOLEAN");
   IElementType BUILTIN_TYPE = new UMTokenType("BUILTIN_TYPE");
@@ -71,9 +70,6 @@ public interface UMTypes {
       IElementType type = node.getElementType();
       if (type == ATTRIBUTE) {
         return new UMAttributeImpl(node);
-      }
-      else if (type == ATTRIBUTE_NAME) {
-        return new UMAttributeNameImpl(node);
       }
       else if (type == ATTRIBUTE_PARAMS) {
         return new UMAttributeParamsImpl(node);

@@ -7,9 +7,6 @@ import com.intellij.psi.PsiElement;
 
 public interface UMAttribute extends PsiElement {
 
-  @NotNull
-  UMAttributeName getAttributeName();
-
   @Nullable
   UMAttributeParams getAttributeParams();
 
