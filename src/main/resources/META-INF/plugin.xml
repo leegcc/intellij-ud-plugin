@@ -54,6 +54,9 @@
         <completion.contributor language="UP"
                                 implementationClass="com.usooft.idea.plugin.ud.lang.completion.UPCompletionContributor"/>
 
+        <completion.contributor language="UM"
+                                implementationClass="com.usooft.idea.plugin.ud.lang.completion.UMCompletionContributor"/>
+
         <typedHandler implementation="com.usooft.idea.plugin.ud.lang.typed.UPTypedHandler"/>
 
         <lang.syntaxHighlighterFactory

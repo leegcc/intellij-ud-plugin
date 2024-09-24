@@ -4,7 +4,7 @@ package com.usooft.idea.plugin.ud.lang.parser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static com.usooft.idea.plugin.ud.lang.psi.UMTypes.*;
-import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
+import static com.usooft.idea.plugin.ud.lang.parser.UMParserUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -36,22 +36,33 @@ public class UMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // AT attributeName attributeParams?
+  // AT &<<isNotWhiteSpace>> attributeName attributeParams?
   public static boolean attribute(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "attribute")) return false;
     if (!nextTokenIs(b, AT)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, AT);
+    r = r && attribute_1(b, l + 1);
     r = r && attributeName(b, l + 1);
-    r = r && attribute_2(b, l + 1);
+    r = r && attribute_3(b, l + 1);
     exit_section_(b, m, ATTRIBUTE, r);
     return r;
   }
 
+  // &<<isNotWhiteSpace>>
+  private static boolean attribute_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "attribute_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = isNotWhiteSpace(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
   // attributeParams?
-  private static boolean attribute_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "attribute_2")) return false;
+  private static boolean attribute_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "attribute_3")) return false;
     attributeParams(b, l + 1);
     return true;
   }

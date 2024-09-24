@@ -10,6 +10,8 @@
   elementTypeHolderClass="com.usooft.idea.plugin.ud.lang.psi.UMTypes"
   elementTypeClass="com.usooft.idea.plugin.ud.lang.psi.UMElementType"
   tokenTypeClass="com.usooft.idea.plugin.ud.lang.psi.UMTokenType"
+
+  parserUtilClass="com.usooft.idea.plugin.ud.lang.parser.UMParserUtil"
 }
 
 root ::= (item | comment)*
@@ -38,7 +40,7 @@ fieldDeclaration ::= !(METHODS_KEYWORD | RELATIONS_KEYWORD) IDENTIFIER fieldType
 
 fieldType ::= BUILTIN_TYPE | IDENTIFIER
 
-attribute ::= AT attributeName attributeParams?
+attribute ::= AT &<<isNotWhiteSpace>> attributeName attributeParams?
 
 attributeName ::= IDENTIFIER (DOT IDENTIFIER)*
 
