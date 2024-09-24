@@ -27,7 +27,7 @@ public class UMCompletionContributor extends CompletionContributor {
                     protected void addCompletions(@NotNull CompletionParameters parameters,
                                                   @NotNull ProcessingContext context,
                                                   @NotNull CompletionResultSet result) {
-                        System.out.println(parameters.getPosition() + ", parent: " + parameters.getPosition().getParent());
+//                        System.out.println(parameters.getPosition() + ", parent: " + parameters.getPosition().getParent());
                     }
                 }
         );
