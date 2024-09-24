@@ -3,7 +3,6 @@ package com.usooft.idea.plugin.ud.lang.completion;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
@@ -63,11 +62,11 @@ public class UMCompletionContributor extends CompletionContributor {
                                                   @NotNull ProcessingContext context,
                                                   @NotNull CompletionResultSet result) {
                         List<LookupElementBuilder> typeOptions = new ArrayList<>();
-                        typeOptions.add(LookupElementBuilder.create("Int"));
-                        typeOptions.add(LookupElementBuilder.create("String"));
-                        typeOptions.add(LookupElementBuilder.create("DateTime"));
-                        typeOptions.add(LookupElementBuilder.create("Boolean"));
-                        typeOptions.add(LookupElementBuilder.create("Decimal"));
+                        typeOptions.add(LookupElementBuilder.create("Int").withTypeText("整数"));
+                        typeOptions.add(LookupElementBuilder.create("String").withTypeText("字符串"));
+                        typeOptions.add(LookupElementBuilder.create("DateTime").withTypeText("日期时间"));
+                        typeOptions.add(LookupElementBuilder.create("Boolean").withTypeText("布尔值"));
+                        typeOptions.add(LookupElementBuilder.create("Decimal").withTypeText("小数"));
                         result.addAllElements(typeOptions);
                     }
                 }
@@ -237,74 +236,85 @@ public class UMCompletionContributor extends CompletionContributor {
                     protected void addCompletions(@NotNull CompletionParameters parameters,
                                                   @NotNull ProcessingContext context,
                                                   @NotNull CompletionResultSet result) {
-                        result.addElement(LookupElementBuilder.create("id"));
-                        result.addElement(LookupElementBuilder.create("key"));
-                        result.addElement(LookupElementBuilder.create("createdAt"));
-                        result.addElement(LookupElementBuilder.create("updatedAt"));
+                        result.addElement(LookupElementBuilder.create("id").withTypeText("唯一标识符"));
+                        result.addElement(LookupElementBuilder.create("key").withTypeText("关联字段"));
+                        result.addElement(LookupElementBuilder.create("createdAt").withTypeText("创建时间"));
+                        result.addElement(LookupElementBuilder.create("updatedAt").withTypeText("更新时间"));
                         result.addElement(LookupElementBuilder.create("state")
+                                .withTypeText("状态字段")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
-                        result.addElement(LookupElementBuilder.create("version"));
-                        result.addElement(LookupElementBuilder.create("password"));
+                        result.addElement(LookupElementBuilder.create("version").withTypeText("版本字段"));
+                        result.addElement(LookupElementBuilder.create("password").withTypeText("密码字段"));
                         result.addElement(LookupElementBuilder.create("range")
+                                .withTypeText("取值范围")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
                         result.addElement(LookupElementBuilder.create("pattern")
+                                .withTypeText("取值模式")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "(//)");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 2);
                                 }));
-                        result.addElement(LookupElementBuilder.create("index"));
-                        result.addElement(LookupElementBuilder.create("unique"));
-                        result.addElement(LookupElementBuilder.create("sortable"));
+                        result.addElement(LookupElementBuilder.create("index").withTypeText("索引"));
+                        result.addElement(LookupElementBuilder.create("unique").withTypeText("唯一值"));
+                        result.addElement(LookupElementBuilder.create("sortable").withTypeText("支持排序"));
                         result.addElement(LookupElementBuilder.create("filter")
+                                .withTypeText("支持过滤")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
-                        result.addElement(LookupElementBuilder.create("secret"));
+                        result.addElement(LookupElementBuilder.create("secret").withTypeText("保密字段"));
                         result.addElement(LookupElementBuilder.create("initial")
+                                .withTypeText("初始值")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
                         result.addElement(LookupElementBuilder.create("computed")
+                                .withTypeText("计算字段")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
-                        result.addElement(LookupElementBuilder.create("nullable"));
-                        result.addElement(LookupElementBuilder.create("mutable"));
-                        result.addElement(LookupElementBuilder.create("mutable.once"));
+                        result.addElement(LookupElementBuilder.create("nullable").withTypeText("可为空"));
+                        result.addElement(LookupElementBuilder.create("mutable").withTypeText("可修改"));
+                        result.addElement(LookupElementBuilder.create("mutable.once").withTypeText("仅可修改一次"));
                         result.addElement(LookupElementBuilder.create("aggr")
+                                .withTypeText("支持聚合")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
                         result.addElement(LookupElementBuilder.create("aggr.having")
+                                .withTypeText("聚合过滤")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
-                        result.addElement(LookupElementBuilder.create("aggr.group"));
-                        result.addElement(LookupElementBuilder.create("aggr.sortable"));
+                        result.addElement(LookupElementBuilder.create("aggr.group").withTypeText("聚合分组"));
+                        result.addElement(LookupElementBuilder.create("aggr.sortable").withTypeText("聚合排序"));
                         result.addElement(LookupElementBuilder.create("db.varchar")
+                                .withTypeText("VARCHAR 类型")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
-                        result.addElement(LookupElementBuilder.create("db.text"));
-                        result.addElement(LookupElementBuilder.create("db.bigint"));
+                        result.addElement(LookupElementBuilder.create("db.text").withTypeText("TEXT 类型"));
+                        result.addElement(LookupElementBuilder.create("db.bigint").withTypeText("BIGINT 类型"));
                         result.addElement(LookupElementBuilder.create("db.decimal")
+                                .withTypeText("DECIMAL 类型")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
                                 }));
                         result.addElement(LookupElementBuilder.create("db.column")
+                                .withTypeText("数据库列名")
                                 .withInsertHandler((insertContext, item) -> {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
