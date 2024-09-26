@@ -1,8 +1,11 @@
 package com.usooft.idea.plugin.ud.lang.completion;
 
 import com.intellij.codeInsight.completion.*;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.patterns.PlatformPatterns;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
@@ -10,13 +13,20 @@ import com.usooft.idea.plugin.ud.lang.UMLanguage;
 import com.usooft.idea.plugin.ud.lang.psi.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UMCompletionContributor extends CompletionContributor {
+
+    private static class ParenthesisInsertHandler implements InsertHandler<LookupElement> {
+        @Override
+        public void handleInsert(@NotNull InsertionContext context, @NotNull LookupElement item) {
+            Editor editor = context.getEditor();
+            int caretOffset = editor.getCaretModel().getOffset();
+            editor.getCaretModel().moveToOffset(caretOffset - 1);
+        }
+    }
+
     public UMCompletionContributor() {
         extend(
                 CompletionType.BASIC,
@@ -225,16 +235,63 @@ public class UMCompletionContributor extends CompletionContributor {
                                     Collections.reverse(filteredGroupOptions);
                                     result.caseInsensitive().addAllElements(filteredGroupOptions);
                                 }
-                            } 
+                            }
                         }
                     }
                 }
         );
 
+        // @@methods 块中的方法名补全
+        extend(
+                CompletionType.BASIC,
+                PlatformPatterns.psiElement()
+                        .withParent(UMMethodName.class)
+                        .withLanguage(UMLanguage.INSTANCE),
+                new CompletionProvider<>() {
+                    @Override
+                    protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                  @NotNull ProcessingContext context,
+                                                  @NotNull CompletionResultSet result) {
+                        ParenthesisInsertHandler insertHandler = new ParenthesisInsertHandler();
+                        List<LookupElementBuilder> methodOptions = new ArrayList<>();
+                        methodOptions.add(LookupElementBuilder.create("create()").withTypeText("创建").withInsertHandler(insertHandler));
+                        methodOptions.add(LookupElementBuilder.create("createMany()").withTypeText("批量创建"));
+                        methodOptions.add(LookupElementBuilder.create("update()").withTypeText("更新").withInsertHandler(insertHandler));
+                        methodOptions.add(LookupElementBuilder.create("delete").withTypeText("删除"));
+                        methodOptions.add(LookupElementBuilder.create("get()").withTypeText("获取").withInsertHandler(insertHandler));
+                        methodOptions.add(LookupElementBuilder.create("find()").withTypeText("查找").withInsertHandler(insertHandler));
+                        methodOptions.add(LookupElementBuilder.create("count()").withTypeText("计数"));
+                        methodOptions.add(LookupElementBuilder.create("list()").withTypeText("列表"));
+                        methodOptions.add(LookupElementBuilder.create("page()").withTypeText("分页"));
+                        methodOptions.add(LookupElementBuilder.create("aggr()").withTypeText("聚合"));
+
+                        // 获取已存在的方法名
+                        Set<String> existingMethods = PsiTreeUtil.findChildrenOfType(
+                                        PsiTreeUtil.getParentOfType(parameters.getPosition(), UMMethodsBlock.class),
+                                        UMMethodName.class
+                                ).stream()
+                                .map(PsiElement::getText)
+                                .map(text -> text + "()")
+                                .collect(Collectors.toSet());
+
+                        // 只过滤掉 count、delete、aggr、page、createMany 方法
+                        List<String> methodsToFilter = Arrays.asList("count()", "delete()", "aggr()", "page()", "createMany()");
+                        List<LookupElementBuilder> filteredMethodOptions = methodOptions.stream()
+                                .filter(option -> !methodsToFilter.contains(option.getLookupString()) ||
+                                                  !existingMethods.contains(option.getLookupString()))
+                                .collect(Collectors.toList());
+
+                        result.caseInsensitive().addAllElements(filteredMethodOptions);
+                    }
+                }
+        );
+
+        // 字段的属性补全
         extend(
                 CompletionType.BASIC,
                 PlatformPatterns.psiElement()
                         .withParent(UMAttribute.class)
+                        .withSuperParent(2, UMFieldDeclaration.class)
                         .withLanguage(UMLanguage.INSTANCE),
                 new CompletionProvider<>() {
                     @Override
@@ -250,7 +307,6 @@ public class UMCompletionContributor extends CompletionContributor {
                                 parameters.getPosition().getParent().getParent(),
                                 UMAttribute.class
                         ).stream().map(attr -> attr.getFirstChild().getText()).collect(Collectors.toSet());
-                        System.out.println(existingAttributes);
 
                         List<LookupElementBuilder> attributeOptions = new ArrayList<>();
 
@@ -363,6 +419,188 @@ public class UMCompletionContributor extends CompletionContributor {
                                     insertContext.getDocument().insertString(insertContext.getTailOffset(), "(//)");
                                     insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 2);
                                 }));
+                    }
+                }
+        );
+
+        // 关联的属性补全
+        extend(CompletionType.BASIC,
+                PlatformPatterns.psiElement()
+                        .withParent(UMAttribute.class)
+                        .withSuperParent(2, UMRelationDeclaration.class)
+                        .withLanguage(UMLanguage.INSTANCE),
+                new CompletionProvider<>() {
+                    @Override
+                    protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                  @NotNull ProcessingContext context,
+                                                  @NotNull CompletionResultSet result) {
+                        List<LookupElementBuilder> relationOptions = new ArrayList<>();
+                        boolean startsWithAt = parameters.getPosition().getText().startsWith("@");
+                        Set<String> existingAttributes = getExistingAttributes(parameters.getPosition());
+
+                        if (!existingAttributes.contains("@source")) {
+                            addAttributeWithParentheses(relationOptions, "@source", "源字段", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@target")) {
+                            addAttributeWithParentheses(relationOptions, "@target", "目标字段", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@filter")) {
+                            addAttributeWithParentheses(relationOptions, "@filter", "过滤条件", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@reversed")) {
+                            addAttribute(relationOptions, "@reversed", "反向关联", startsWithAt);
+                        }
+
+                        result.addAllElements(relationOptions);
+                    }
+
+                    private void addAttributeWithParentheses(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name)
+                                .withTypeText(typeText)
+                                .withInsertHandler((insertContext, item) -> {
+                                    insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
+                                    insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
+                                }));
+                    }
+
+                    private void addAttribute(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name).withTypeText(typeText));
+                    }
+
+                    private Set<String> getExistingAttributes(PsiElement element) {
+                        Set<String> existingAttributes = new HashSet<>();
+                        PsiElement parent = element.getParent();
+                        while (parent != null) {
+                            if (parent instanceof UMFieldDeclaration) {
+                                for (UMAttribute attribute : ((UMFieldDeclaration) parent).getAttributeList()) {
+                                    existingAttributes.add(attribute.getFirstChild().getText());
+                                }
+                                break;
+                            }
+                            parent = parent.getParent();
+                        }
+                        return existingAttributes;
+                    }
+                }
+        );
+
+        // 关联字段属性补全
+        extend(
+                CompletionType.BASIC,
+                PlatformPatterns.psiElement()
+                        .withParent(UMAttribute.class)
+                        .withSuperParent(2, UMRelationField.class)
+                        .withLanguage(UMLanguage.INSTANCE),
+                new CompletionProvider<>() {
+                    @Override
+                    protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                  @NotNull ProcessingContext context,
+                                                  @NotNull CompletionResultSet result) {
+                        String currentText = parameters.getPosition().getText();
+                        boolean startsWithAt = currentText.startsWith("@");
+
+                        Set<String> existingAttributes = getExistingAttributes(parameters.getPosition());
+
+                        List<LookupElementBuilder> attributeOptions = new ArrayList<>();
+
+                        if (!existingAttributes.contains("@wrap")) {
+                            addAttribute(attributeOptions, "@wrap", "关联查出", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@filter")) {
+                            addAttributeWithParentheses(attributeOptions, "@filter", "过滤条件", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@sortable")) {
+                            addAttribute(attributeOptions, "@sortable", "可排序", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@aggr")) {
+                            addAttributeWithParentheses(attributeOptions, "@aggr", "支持聚合", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@aggr.having")) {
+                            addAttributeWithParentheses(attributeOptions, "@aggr.having", "聚合过滤", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@aggr.group")) {
+                            addAttributeWithParentheses(attributeOptions, "@aggr.group", "聚合分组", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@aggr.sortable")) {
+                            addAttribute(attributeOptions, "@aggr.sortable", "聚合排序", startsWithAt);
+                        }
+
+                        result.addAllElements(attributeOptions);
+                    }
+
+                    private void addAttributeWithParentheses(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name)
+                                .withTypeText(typeText)
+                                .withInsertHandler((insertContext, item) -> {
+                                    insertContext.getDocument().insertString(insertContext.getTailOffset(), "()");
+                                    insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 1);
+                                }));
+                    }
+
+                    private void addAttribute(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name).withTypeText(typeText));
+                    }
+
+                    private Set<String> getExistingAttributes(PsiElement element) {
+                        Set<String> existingAttributes = new HashSet<>();
+                        PsiElement parent = element.getParent();
+                        while (parent != null) {
+                            if (parent instanceof UMRelationField) {
+                                for (UMAttribute attribute : ((UMRelationField) parent).getAttributeList()) {
+                                    existingAttributes.add(attribute.getFirstChild().getText());
+                                }
+                                break;
+                            }
+                            parent = parent.getParent();
+                        }
+                        return existingAttributes;
+                    }
+                }
+        );
+
+        // 方法声明的属性补全
+        extend(
+                CompletionType.BASIC,
+                PlatformPatterns.psiElement()
+                        .withParent(UMAttribute.class)
+                        .withSuperParent(2, UMMethodDeclaration.class)
+                        .withLanguage(UMLanguage.INSTANCE),
+                new CompletionProvider<>() {
+                    @Override
+                    protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                  @NotNull ProcessingContext context,
+                                                  @NotNull CompletionResultSet result) {
+                        String currentText = parameters.getPosition().getText();
+                        boolean startsWithAt = currentText.startsWith("@");
+
+                        Set<String> existingAttributes = PsiTreeUtil.findChildrenOfType(
+                                parameters.getPosition().getParent().getParent(),
+                                UMAttribute.class
+                        ).stream().map(attr -> attr.getFirstChild().getText()).collect(Collectors.toSet());
+
+                        List<LookupElementBuilder> attributeOptions = new ArrayList<>();
+
+                        if (!existingAttributes.contains("@name")) {
+                            addAttributeWithParentheses(attributeOptions, "@name", "方法名称", startsWithAt);
+                        }
+                        if (!existingAttributes.contains("@event")) {
+                            addAttribute(attributeOptions, "@event", "暴露事件", startsWithAt);
+                        }
+
+                        result.addAllElements(attributeOptions);
+                    }
+
+                    private void addAttributeWithParentheses(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name)
+                                .withTypeText(typeText)
+                                .withInsertHandler((insertContext, item) -> {
+                                    insertContext.getDocument().insertString(insertContext.getTailOffset(), "(\"\")");
+                                    insertContext.getEditor().getCaretModel().moveToOffset(insertContext.getTailOffset() - 2);
+                                }));
+                    }
+
+                    private void addAttribute(List<LookupElementBuilder> options, String name, String typeText, boolean startsWithAt) {
+                        options.add(LookupElementBuilder.create(startsWithAt ? name.substring(1) : name).withTypeText(typeText));
                     }
                 }
         );
