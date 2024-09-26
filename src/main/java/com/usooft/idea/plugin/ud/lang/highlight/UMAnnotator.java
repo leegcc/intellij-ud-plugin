@@ -6,7 +6,11 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.usooft.idea.plugin.ud.lang.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.usooft.idea.plugin.ud.lang.psi.UMFieldType;
+import com.usooft.idea.plugin.ud.lang.psi.UMFunctionCall;
+import com.usooft.idea.plugin.ud.lang.psi.UMMethodParam;
+import com.usooft.idea.plugin.ud.lang.psi.UMTypes;
 import org.jetbrains.annotations.NotNull;
 
 public class UMAnnotator implements Annotator {
@@ -30,6 +34,15 @@ public class UMAnnotator implements Annotator {
 
         // 方法名
         if (elementType == UMTypes.METHOD_NAME) {
+            holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+                    .range(element.getTextRange())
+                    .textAttributes(UMSyntaxHighlighter.METHOD_NAME)
+                    .create();
+            return;
+        }
+
+        // 方法中的函数名
+        if (elementType == UMTypes.IDENTIFIER && PsiTreeUtil.getParentOfType(element, UMFunctionCall.class) != null) {
             holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
                     .range(element.getTextRange())
                     .textAttributes(UMSyntaxHighlighter.METHOD_NAME)
