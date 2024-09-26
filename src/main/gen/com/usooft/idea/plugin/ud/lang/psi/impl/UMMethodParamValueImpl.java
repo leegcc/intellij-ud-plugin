@@ -29,6 +29,12 @@ public class UMMethodParamValueImpl extends ASTWrapperPsiElement implements UMMe
 
   @Override
   @Nullable
+  public UMFunctionCall getFunctionCall() {
+    return findChildByClass(UMFunctionCall.class);
+  }
+
+  @Override
+  @Nullable
   public UMStatusTransaction getStatusTransaction() {
     return findChildByClass(UMStatusTransaction.class);
   }

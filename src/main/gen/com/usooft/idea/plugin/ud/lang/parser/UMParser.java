@@ -152,7 +152,7 @@ public class UMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // attributeValueReference ((PLUS | MINUS | MULT | DIV) attributeValueReference)?
+  // attributeValueReference ((PLUS | MINUS | MULT | DIV | DOUBLE_EQUALS | GT | LT | GTE | LTE) (attributeValueReference | BOOLEAN | STRING | NUMBER))?
   public static boolean computedExpr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "computedExpr")) return false;
     if (!nextTokenIs(b, IDENTIFIER)) return false;
@@ -164,25 +164,25 @@ public class UMParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ((PLUS | MINUS | MULT | DIV) attributeValueReference)?
+  // ((PLUS | MINUS | MULT | DIV | DOUBLE_EQUALS | GT | LT | GTE | LTE) (attributeValueReference | BOOLEAN | STRING | NUMBER))?
   private static boolean computedExpr_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "computedExpr_1")) return false;
     computedExpr_1_0(b, l + 1);
     return true;
   }
 
-  // (PLUS | MINUS | MULT | DIV) attributeValueReference
+  // (PLUS | MINUS | MULT | DIV | DOUBLE_EQUALS | GT | LT | GTE | LTE) (attributeValueReference | BOOLEAN | STRING | NUMBER)
   private static boolean computedExpr_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "computedExpr_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = computedExpr_1_0_0(b, l + 1);
-    r = r && attributeValueReference(b, l + 1);
+    r = r && computedExpr_1_0_1(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // PLUS | MINUS | MULT | DIV
+  // PLUS | MINUS | MULT | DIV | DOUBLE_EQUALS | GT | LT | GTE | LTE
   private static boolean computedExpr_1_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "computedExpr_1_0_0")) return false;
     boolean r;
@@ -190,6 +190,22 @@ public class UMParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, MINUS);
     if (!r) r = consumeToken(b, MULT);
     if (!r) r = consumeToken(b, DIV);
+    if (!r) r = consumeToken(b, DOUBLE_EQUALS);
+    if (!r) r = consumeToken(b, GT);
+    if (!r) r = consumeToken(b, LT);
+    if (!r) r = consumeToken(b, GTE);
+    if (!r) r = consumeToken(b, LTE);
+    return r;
+  }
+
+  // attributeValueReference | BOOLEAN | STRING | NUMBER
+  private static boolean computedExpr_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "computedExpr_1_0_1")) return false;
+    boolean r;
+    r = attributeValueReference(b, l + 1);
+    if (!r) r = consumeToken(b, BOOLEAN);
+    if (!r) r = consumeToken(b, STRING);
+    if (!r) r = consumeToken(b, NUMBER);
     return r;
   }
 
@@ -546,12 +562,13 @@ public class UMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // statusTransaction | NUMBER | STRING | BOOLEAN | REGEX | IDENTIFIER
+  // statusTransaction | functionCall | NUMBER | STRING | BOOLEAN | REGEX | IDENTIFIER
   public static boolean methodParamValue(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "methodParamValue")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, METHOD_PARAM_VALUE, "<method param value>");
     r = statusTransaction(b, l + 1);
+    if (!r) r = functionCall(b, l + 1);
     if (!r) r = consumeToken(b, NUMBER);
     if (!r) r = consumeToken(b, STRING);
     if (!r) r = consumeToken(b, BOOLEAN);

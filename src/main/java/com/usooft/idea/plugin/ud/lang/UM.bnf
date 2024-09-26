@@ -59,7 +59,7 @@ functionParams ::= functionParam (COMMA functionParam)*
 
 functionParam ::= attributeValue
 
-computedExpr ::= attributeValueReference ((PLUS | MINUS | MULT | DIV) attributeValueReference)?
+computedExpr ::= attributeValueReference ((PLUS | MINUS | MULT | DIV | DOUBLE_EQUALS | GT | LT | GTE | LTE) (attributeValueReference | BOOLEAN | STRING | NUMBER))?
 
 attributeValueReference ::= IDENTIFIER (DOT IDENTIFIER)?
 
@@ -105,7 +105,7 @@ methodParams ::= methodParam (COMMA methodParam)*
 
 methodParam ::= IDENTIFIER (PLUS | MINUS | QUESTION)? (EQUALS methodParamValue)?
 
-methodParamValue ::= statusTransaction | NUMBER | STRING | BOOLEAN | REGEX | IDENTIFIER
+methodParamValue ::= statusTransaction | functionCall | NUMBER | STRING | BOOLEAN | REGEX | IDENTIFIER
 
 statusTransaction ::= (BOOLEAN PIPE BOOLEAN) | (IDENTIFIER PIPE IDENTIFIER)
 

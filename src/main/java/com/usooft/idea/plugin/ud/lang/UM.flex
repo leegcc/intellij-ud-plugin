@@ -44,6 +44,11 @@ ATTRIBUTE_PATTERN="@"[a-zA-Z.]+
   "-"                   { return UMTypes.MINUS; }
   "*"                   { return UMTypes.MULT; }
   "/"                   { return UMTypes.DIV; }
+  ">"                   { return UMTypes.GT; }
+  "<"                   { return UMTypes.LT; }
+  ">="                  { return UMTypes.GTE; }
+  "<="                  { return UMTypes.LTE; }
+  "=="                  { return UMTypes.DOUBLE_EQUALS; }
   "?"                   { return UMTypes.QUESTION; }
 
   "Int" | "String" | "Boolean" | "DateTime" | "Decimal" { return UMTypes.BUILTIN_TYPE; }

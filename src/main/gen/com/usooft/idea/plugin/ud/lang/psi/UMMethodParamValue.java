@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface UMMethodParamValue extends PsiElement {
 
   @Nullable
+  UMFunctionCall getFunctionCall();
+
+  @Nullable
   UMStatusTransaction getStatusTransaction();
 
 }
