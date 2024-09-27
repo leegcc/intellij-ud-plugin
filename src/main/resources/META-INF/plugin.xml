@@ -21,10 +21,22 @@
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+        <!-- Standard -->
+        <localInspection language="JAVA"
+                         implementationClass="com.usooft.idea.plugin.ud.standard.inspection.CommandAnnotationInspection"
+                         shortName="CommandAnnotation"
+                         displayName="Command annotation inspection"
+                         groupName="Java"
+                         bundle="messages.InspectionBundle"
+                         enabledByDefault="true"
+                         key="inspection.commandAnnotation.description"/>
+
+        <!-- Language -->
         <fileType
                 name="UD Module File"
                 implementationClass="com.usooft.idea.plugin.ud.lang.UMFileType"

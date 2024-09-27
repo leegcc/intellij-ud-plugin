@@ -1,0 +1,34 @@
+<html>
+<body>
+检测带有 @Command 注解的类是否包含 execute() 方法。
+
+<p>
+    此检查确保所有使用 @Command 注解的类都正确实现了 execute() 方法。这有助于维护命令模式的一致性和正确性。
+</p>
+
+<p>
+    示例代码：
+</p>
+
+<pre><code>
+@Command
+public class MyCommand {
+    // 缺少 execute() 方法，将触发错误
+}
+
+@Command
+public class CorrectCommand {
+    public void execute() {
+        // 正确实现
+    }
+}
+</code></pre>
+
+<!-- tooltip end -->
+
+<p>此检查有助于确保命令模式的正确实现，提高代码质量和可维护性。</p>
+
+<p>如需调整相关设置，请访问 <a href="settings://?">检查设置</a>。</p>
+
+</body>
+</html>
